@@ -31,13 +31,20 @@ public:
         return Money(dollars * 100 + cents);
     }
 
+    [[nodiscard]] static Money FromRupeesAndPaise(int64_t rupees, int64_t paise) {
+        if (paise < 0 || paise >= 100) {
+            throw std::invalid_argument("Paise must be between 0 and 99");
+        }
+        return Money(rupees * 100 + paise);
+    }
+
     [[nodiscard]] std::string ToString() const {
         std::ostringstream oss;
         int64_t abs_cents = cents_ < 0 ? -cents_ : cents_;
         if (cents_ < 0) {
             oss << "-";
         }
-        oss << "$" << (abs_cents / 100) << "."
+        oss << "₹" << (abs_cents / 100) << "."
             << std::setfill('0') << std::setw(2) << (abs_cents % 100);
         return oss.str();
     }

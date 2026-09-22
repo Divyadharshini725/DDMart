@@ -28,7 +28,7 @@
                 <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">Order Summary</h2>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem; color:var(--text-secondary);">
                     <span>Items Subtotal:</span>
-                    <span id="summary-subtotal">$0.00</span>
+                    <span id="summary-subtotal">&#8377;0.00</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem; color:var(--text-secondary);">
                     <span>Estimated Shipping:</span>
@@ -37,7 +37,7 @@
                 <hr style="border:0; border-top:1px solid var(--border-color); margin:1rem 0;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-size:1.2rem; font-weight:800;">
                     <span>Total:</span>
-                    <span id="summary-total">$0.00</span>
+                    <span id="summary-total">&#8377;0.00</span>
                 </div>
                 <button id="checkout-btn" onclick="openCheckoutModal()" class="btn btn-primary" style="width:100%; padding:0.8rem; font-size:1rem;">
                     Proceed to Checkout 💳
@@ -73,7 +73,7 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; font-size:1.1rem; font-weight:800;">
                     <span>Amount to Charge:</span>
-                    <span id="modal-charge-total">$0.00</span>
+                    <span id="modal-charge-total">&#8377;0.00</span>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width:100%; padding:0.8rem; font-size:1rem;">
@@ -117,8 +117,8 @@
                         <a href="/" class="btn btn-primary">Start Browsing</a>
                     </div>
                 `;
-                document.getElementById('summary-subtotal').textContent = '$0.00';
-                document.getElementById('summary-total').textContent = '$0.00';
+                document.getElementById('summary-subtotal').textContent = '&#8377;0.00';
+                document.getElementById('summary-total').textContent = '&#8377;0.00';
                 document.getElementById('checkout-btn').disabled = true;
                 return;
             }
