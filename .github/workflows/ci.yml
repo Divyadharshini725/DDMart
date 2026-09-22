@@ -1,0 +1,35 @@
+name: DDMart C++ CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Install Build Toolchain & Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build pkg-config \
+            libsqlite3-dev libsodium-dev libspdlog-dev \
+            nlohmann-json3-dev libgtest-dev clang-tidy cppcheck
+
+      - name: Configure CMake with Sanitizers (ASan + UBSan)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g"
+
+      - name: Build Standalone Binary & Tests
+        run: cmake --build build --config Debug
+
+      - name: Execute Automated Test Suite (ctest)
+        run: ctest --test-dir build --output-on-failure

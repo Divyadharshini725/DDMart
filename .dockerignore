@@ -1,0 +1,7 @@
+.git
+build/
+bin/
+*.db
+.env
+config.json
+.vscode/

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart — DDMart Marketplace</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="/" class="brand">
+                🛍️ DDMart <span class="brand-badge">Native C++20</span>
+            </a>
+            <div class="nav-actions" id="nav-actions"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 style="font-size:1.8rem; font-weight:800; margin-bottom:1.5rem;">Shopping Cart</h1>
+
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:2rem; align-items:flex-start;" id="cart-layout">
+            <div id="cart-items-container" style="background:white; border-radius:var(--radius); border:1px solid var(--border-color); padding:1.5rem;">
+                <p style="color:var(--text-secondary);">Loading cart...</p>
+            </div>
+
+            <div style="background:white; border-radius:var(--radius); border:1px solid var(--border-color); padding:1.5rem;" id="cart-summary">
+                <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">Order Summary</h2>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem; color:var(--text-secondary);">
+                    <span>Items Subtotal:</span>
+                    <span id="summary-subtotal">$0.00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem; color:var(--text-secondary);">
+                    <span>Estimated Shipping:</span>
+                    <span style="color:var(--success); font-weight:700;">FREE</span>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:1rem 0;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-size:1.2rem; font-weight:800;">
+                    <span>Total:</span>
+                    <span id="summary-total">$0.00</span>
+                </div>
+                <button id="checkout-btn" onclick="openCheckoutModal()" class="btn btn-primary" style="width:100%; padding:0.8rem; font-size:1rem;">
+                    Proceed to Checkout 💳
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mock Payment / Checkout Modal -->
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+                <h2 style="font-size:1.4rem; font-weight:800;">Secure Mock Checkout</h2>
+                <button onclick="closeCheckoutModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">
+                Per project scope constraint, payment is verified via a mock confirmation step.
+            </p>
+
+            <form id="checkout-form">
+                <div style="margin-bottom:1.2rem;">
+                    <label style="display:block; font-size:0.9rem; font-weight:700; margin-bottom:0.4rem;">Shipping Address</label>
+                    <textarea id="shipping-address" required rows="3" style="width:100%; padding:0.75rem; border:1px solid var(--border-color); border-radius:8px;" placeholder="123 Academic Way, Chennai, TN 600025"></textarea>
+                </div>
+
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block; font-size:0.9rem; font-weight:700; margin-bottom:0.4rem;">Mock Payment Method</label>
+                    <div style="background:#f1f5f9; padding:0.8rem; border-radius:8px; display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; font-weight:600;">
+                        💳 Test Visa ending in 4242 (Simulated Instant Approval)
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; font-size:1.1rem; font-weight:800;">
+                    <span>Amount to Charge:</span>
+                    <span id="modal-charge-total">$0.00</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:0.8rem; font-size:1rem;">
+                    Confirm & Place Order 🚀
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        let cartData = null;
+
+        async function loadCart() {
+            try {
+                const res = await fetch('/api/v1/cart');
+                const data = await res.json();
+                if (data.success && data.data) {
+                    cartData = data.data;
+                    renderCart(cartData);
+                } else {
+                    document.getElementById('cart-items-container').innerHTML = `
+                        <div style="text-align:center; padding:2rem;">
+                            <p style="color:var(--text-secondary); margin-bottom:1rem;">Your shopping cart is empty.</p>
+                            <a href="/" class="btn btn-primary">Start Browsing</a>
+                        </div>
+                    `;
+                    document.getElementById('checkout-btn').disabled = true;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderCart(cart) {
+            const container = document.getElementById('cart-items-container');
+            if (!cart.items || cart.items.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:2rem;">
+                        <p style="color:var(--text-secondary); margin-bottom:1rem;">Your shopping cart is empty.</p>
+                        <a href="/" class="btn btn-primary">Start Browsing</a>
+                    </div>
+                `;
+                document.getElementById('summary-subtotal').textContent = '$0.00';
+                document.getElementById('summary-total').textContent = '$0.00';
+                document.getElementById('checkout-btn').disabled = true;
+                return;
+            }
+
+            document.getElementById('checkout-btn').disabled = false;
+            document.getElementById('summary-subtotal').textContent = cart.total_amount_formatted;
+            document.getElementById('summary-total').textContent = cart.total_amount_formatted;
+            document.getElementById('modal-charge-total').textContent = cart.total_amount_formatted;
+
+            container.innerHTML = cart.items.map(item => `
+                <div style="display:flex; gap:1.2rem; align-items:center; padding:1rem 0; border-bottom:1px solid var(--border-color);">
+                    <img src="${DDMart.escapeHtml(item.image_url)}" alt="${DDMart.escapeHtml(item.product_name)}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
+                    <div style="flex:1;">
+                        <h4 style="font-size:1rem; font-weight:700; margin-bottom:0.2rem;">${DDMart.escapeHtml(item.product_name)}</h4>
+                        <div style="color:var(--text-secondary); font-size:0.85rem;">Unit Price: ${DDMart.escapeHtml(item.unit_price_formatted)}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <button onclick="updateQty(${item.id}, ${item.quantity - 1})" class="btn btn-outline" style="padding:0.2rem 0.6rem;">-</button>
+                        <span style="font-weight:700; min-width:20px; text-align:center;">${item.quantity}</span>
+                        <button onclick="updateQty(${item.id}, ${item.quantity + 1})" class="btn btn-outline" style="padding:0.2rem 0.6rem;">+</button>
+                    </div>
+                    <div style="min-width:80px; text-align:right; font-weight:800; font-size:1rem;">
+                        ${DDMart.escapeHtml(item.subtotal_formatted)}
+                    </div>
+                    <button onclick="removeItem(${item.id})" class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem;">
+                        🗑️
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function updateQty(cartItemId, newQty) {
+            if (newQty <= 0) {
+                return removeItem(cartItemId);
+            }
+            try {
+                const res = await fetch(`/api/v1/cart/${cartItemId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantity: newQty })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cartData = data.data;
+                    renderCart(cartData);
+                    DDMart.updateCartBadge();
+                } else {
+                    DDMart.showToast(data.error?.message || 'Could not update quantity', 'danger');
+                }
+            } catch (e) {
+                DDMart.showToast('Network error updating item', 'danger');
+            }
+        }
+
+        async function removeItem(cartItemId) {
+            try {
+                const res = await fetch(`/api/v1/cart/${cartItemId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    cartData = data.data;
+                    renderCart(cartData);
+                    DDMart.updateCartBadge();
+                    DDMart.showToast('Item removed from cart', 'info');
+                }
+            } catch (e) {
+                DDMart.showToast('Network error removing item', 'danger');
+            }
+        }
+
+        function openCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('active');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').classList.remove('active');
+        }
+
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const address = document.getElementById('shipping-address').value.trim();
+
+            try {
+                const res = await fetch('/api/v1/orders/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shipping_address: address, payment_method: 'MOCK_CARD' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeCheckoutModal();
+                    DDMart.updateCartBadge();
+                    DDMart.showToast('Order confirmed and placed successfully! 🎉', 'success');
+                    setTimeout(() => window.location.href = '/orders.html', 1000);
+                } else {
+                    DDMart.showToast(data.error?.message || 'Checkout failed', 'danger');
+                }
+            } catch (err) {
+                DDMart.showToast('Network error during checkout', 'danger');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadCart);
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+# Build directories
+build/
+bin/
+out/
+.cache/
+CMakeFiles/
+CMakeCache.txt
+*.ninja
+.ninja_*
+
+# Secrets and environment files (Mandatory Security Rule Section 12 & 16)
+.env
+config.json
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+ddmart.db
+
+# Executables & libraries
+*.exe
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# OS & Editor
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db

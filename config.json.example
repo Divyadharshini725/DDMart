@@ -1,0 +1,21 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "threads": 4
+  },
+  "database": {
+    "type": "sqlite",
+    "path": "ddmart.db",
+    "connection_pool_size": 10
+  },
+  "security": {
+    "session_timeout_seconds": 3600,
+    "argon2_memory_cost": 65536,
+    "argon2_time_cost": 2
+  },
+  "logging": {
+    "level": "info",
+    "structured": true
+  }
+}

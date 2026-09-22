@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders — DDMart Marketplace</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="/" class="brand">
+                🛍️ DDMart <span class="brand-badge">Native C++20</span>
+            </a>
+            <div class="nav-actions" id="nav-actions"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 style="font-size:1.8rem; font-weight:800; margin-bottom:1.5rem;">Order History & Tracking</h1>
+        <div id="orders-list" style="display:flex; flex-direction:column; gap:1.5rem;">
+            <p style="color:var(--text-secondary);">Loading orders...</p>
+        </div>
+    </main>
+
+    <!-- Review Modal (F8: Reviews on completed orders) -->
+    <div class="modal-overlay" id="review-modal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2 style="font-size:1.3rem; font-weight:800;">Write Product Review</h2>
+                <button onclick="closeReviewModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <p id="review-product-name" style="font-weight:700; color:var(--primary); margin-bottom:1rem;"></p>
+
+            <form id="review-form">
+                <input type="hidden" id="review-product-id">
+                <div style="margin-bottom:1.2rem;">
+                    <label style="display:block; font-size:0.9rem; font-weight:700; margin-bottom:0.4rem;">Star Rating (1 to 5)</label>
+                    <select id="review-rating" style="width:100%; padding:0.6rem; border:1px solid var(--border-color); border-radius:8px; font-weight:700;">
+                        <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
+                        <option value="3">⭐⭐⭐ 3 - Average</option>
+                        <option value="2">⭐⭐ 2 - Poor</option>
+                        <option value="1">⭐ 1 - Terrible</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block; font-size:0.9rem; font-weight:700; margin-bottom:0.4rem;">Review Comment</label>
+                    <textarea id="review-comment" required rows="3" style="width:100%; padding:0.75rem; border:1px solid var(--border-color); border-radius:8px;" placeholder="Share your experience with this item..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; padding:0.75rem;">Submit Verified Review</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        async function loadOrders() {
+            try {
+                const res = await fetch('/api/v1/orders');
+                const data = await res.json();
+                const container = document.getElementById('orders-list');
+
+                if (!data.success || !data.data || data.data.length === 0) {
+                    container.innerHTML = `
+                        <div style="background:white; border-radius:var(--radius); padding:3rem; text-align:center; border:1px solid var(--border-color);">
+                            <p style="color:var(--text-secondary); margin-bottom:1rem;">No past orders found.</p>
+                            <a href="/" class="btn btn-primary">Browse Marketplace</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.data.map(order => `
+                    <div style="background:white; border-radius:var(--radius); border:1px solid var(--border-color); padding:1.5rem; box-shadow:var(--shadow);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:1rem; margin-bottom:1rem;">
+                            <div>
+                                <span style="font-weight:800; font-size:1.1rem;">Order #${order.id}</span>
+                                <span style="color:var(--text-secondary); font-size:0.85rem; margin-left:0.8rem;">Placed on ${DDMart.escapeHtml(order.created_at)}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:1rem;">
+                                <span class="status-badge status-${order.status.toLowerCase()}">${DDMart.escapeHtml(order.status)}</span>
+                                <span style="font-weight:800; font-size:1.1rem; color:var(--text-primary);">${DDMart.escapeHtml(order.total_amount_formatted)}</span>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:1rem;">
+                            ${order.items.map(item => `
+                                <div style="display:flex; gap:1rem; align-items:center;">
+                                    <img src="${DDMart.escapeHtml(item.product_image_url)}" alt="${DDMart.escapeHtml(item.product_name)}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+                                    <div style="flex:1;">
+                                        <h4 style="font-size:0.95rem; font-weight:700;">${DDMart.escapeHtml(item.product_name)}</h4>
+                                        <div style="color:var(--text-secondary); font-size:0.85rem;">
+                                            Qty: ${item.quantity} &times; ${DDMart.escapeHtml(item.unit_price_formatted)}
+                                        </div>
+                                    </div>
+                                    <div style="font-weight:700; font-size:0.95rem;">${DDMart.escapeHtml(item.subtotal_formatted)}</div>
+                                    ${order.status === 'DELIVERED' ? `
+                                        <button onclick="openReviewModal(${item.product_id}, '${DDMart.escapeHtml(item.product_name)}')" class="btn btn-outline" style="padding:0.3rem 0.6rem; font-size:0.8rem;">
+                                            ⭐ Leave Review
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function openReviewModal(productId, productName) {
+            document.getElementById('review-product-id').value = productId;
+            document.getElementById('review-product-name').textContent = productName;
+            document.getElementById('review-modal').classList.add('active');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review-modal').classList.remove('active');
+        }
+
+        document.getElementById('review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = document.getElementById('review-product-id').value;
+            const rating = parseInt(document.getElementById('review-rating').value, 10);
+            const comment = document.getElementById('review-comment').value.trim();
+
+            try {
+                const res = await fetch(`/api/v1/products/${productId}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating, comment })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeReviewModal();
+                    DDMart.showToast('Review submitted successfully! ⭐', 'success');
+                } else {
+                    DDMart.showToast(data.error?.message || 'Could not submit review', 'danger');
+                }
+            } catch (err) {
+                DDMart.showToast('Network error submitting review', 'danger');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadOrders);
+    </script>
+</body>
+</html>
