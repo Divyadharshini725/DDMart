@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ddmart
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: AI_CHATBOT_PROVIDER
+        value: mock
