@@ -4,6 +4,7 @@ set(TEST_SOURCES
     test_main.cpp
     unit/test_money.cpp
     unit/test_validation.cpp
+    unit/test_chat.cpp
     repository/test_sqlite_repositories.cpp
 )
 

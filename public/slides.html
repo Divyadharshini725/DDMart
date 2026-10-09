@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDMart — Capstone Final Review Presentation Slides</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .slide-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .slide-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 3rem 4rem;
+            max-width: 950px;
+            width: 100%;
+            min-height: 520px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeIn 0.3s ease;
+        }
+        .slide-card.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-header {
+            border-bottom: 2px solid #334155;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .slide-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #818cf8;
+            margin: 0;
+        }
+        .slide-header span {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .slide-body {
+            flex: 1;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+        }
+        .slide-body ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        .slide-body li {
+            margin-bottom: 0.8rem;
+        }
+        .slide-body strong {
+            color: #ffffff;
+        }
+        .badge {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .slide-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 3rem;
+            background: #1e293b;
+            border-top: 1px solid #334155;
+        }
+        .ctrl-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .ctrl-btn:hover { background: #4338ca; }
+        .ctrl-btn:disabled { background: #475569; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="slide-container">
+        <!-- Slide 1 -->
+        <div class="slide-card active" data-slide="1">
+            <div class="slide-header">
+                <h2>DDMart — Native C++ Marketplace</h2>
+                <span class="badge">Final Review Oct 10, 2026</span>
+            </div>
+            <div class="slide-body">
+                <p style="font-size:1.4rem; color:#f8fafc; font-weight:700;">High-Performance Multi-Vendor E-Commerce Platform</p>
+                <ul>
+                    <li><strong>Target Specification</strong>: Native C++20 Equivalent of the Servlets/JDBC Capstone.</li>
+                    <li><strong>Builder & Namespace</strong>: Solo Project (<code>dd::ddmart</code>).</li>
+                    <li><strong>Core Stack</strong>: C++20, CMake 3.25+, SQLite 3 (WAL Mode) & PostgreSQL 15+, libsodium (Argon2id), spdlog.</li>
+                    <li><strong>Milestone Status</strong>: 100% Complete across Mandatory (F1–F8) and Optional (O2, O3, O4) Deliverables.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 1 of 10 — Use Arrow Keys or Buttons to Navigate</div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide-card" data-slide="2">
+            <div class="slide-header">
+                <h2>System Architecture Specification</h2>
+                <span class="badge">Architecture</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>Filter Layer</strong>: CORS, Security Headers (nosniff, DENY, XSS protection), Session Check (AuthFilter).</li>
+                    <li><strong>Controller Layer</strong>: Thin HTTP routing and JSON serialization; zero business rules or raw database queries.</li>
+                    <li><strong>Service Layer</strong>: Pure C++ business logic, bounds validation, and transactional orchestration.</li>
+                    <li><strong>Repository Layer</strong>: 100% parameterized SQL; abstracts relational storage behind polymorphic C++ interfaces.</li>
+                    <li><strong>Persistent Storage</strong>: Embedded SQLite 3 with WAL mode for zero-configuration testing; PostgreSQL 15+ production readiness.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 2 of 10</div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide-card" data-slide="3">
+            <div class="slide-header">
+                <h2>Core Marketplace Features (F1–F8)</h2>
+                <span class="badge">Features</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>F1 Authentication & Roles</strong>: Buyer & Seller registration, seeded Admin, Argon2id hashing, session fixation prevention.</li>
+                    <li><strong>F2 Seller Listings</strong>: Full product CRUD with price, stock, and category validation.</li>
+                    <li><strong>F3 Buyer Search & Catalog</strong>: Combined keyword queries, category dropdowns, and sorting filters.</li>
+                    <li><strong>F4 Shopping Cart</strong>: Live stock checking, increment/decrement bounds, and running subtotals.</li>
+                    <li><strong>F5 Checkout & Mock Payment</strong>: Atomic transactional inventory deduction and payment confirmation.</li>
+                    <li><strong>F6 Order Tracking</strong>: Buyer order history and seller incoming fulfillment queues.</li>
+                    <li><strong>F7 Admin Panel</strong>: Platform GMV metrics, user roster, order log, and listing moderation.</li>
+                    <li><strong>F8 Product Reviews</strong>: 1–5 star ratings gated strictly to verified purchasers of completed orders.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 3 of 10</div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide-card" data-slide="4">
+            <div class="slide-header">
+                <h2>Advanced Workflows (O2 & O3)</h2>
+                <span class="badge">Workflows</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>O2 Order Status State Machine</strong>:
+                        <ul>
+                            <li>Deterministic transitions: <code>PENDING</code> &rarr; <code>CONFIRMED</code> &rarr; <code>SHIPPED</code> &rarr; <code>DELIVERED</code>.</li>
+                            <li>State validations enforce sequential progression.</li>
+                        </ul>
+                    </li>
+                    <li><strong>O3 Seller Sales Dashboard</strong>:
+                        <ul>
+                            <li>Real-time GMV aggregation and order count tracking.</li>
+                            <li>Monetary calculations strictly wrapped in the <code>Money</code> value object (paise/cents) to prevent floating-point inaccuracies.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 4 of 10</div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide-card" data-slide="5">
+            <div class="slide-header">
+                <h2>Phase 3: AI Chatbot Architecture (O4)</h2>
+                <span class="badge">AI Feature</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>Frontend Chat Widget</strong>: Floating modern button, responsive panel, typing indicator, and FAQ suggestion pills.</li>
+                    <li><strong>REST Endpoints</strong>: <code>POST /api/chat</code> and <code>POST /api/v1/chat</code> adhering to the fixed JSON envelope.</li>
+                    <li><strong>Strategy Pattern</strong>: Abstract <code>ChatProvider</code> interface with swappable implementations:
+                        <ul>
+                            <li><code>MockChatProvider</code>: Offline domain FAQ answering (10+ topics).</li>
+                            <li><code>GeminiChatProvider</code>: Google Gemini 1.5 Flash cloud LLM integration.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Factory Pattern</strong>: <code>ChatProviderFactory</code> dynamically instantiates active provider.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 5 of 10</div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide-card" data-slide="6">
+            <div class="slide-header">
+                <h2>AI Guardrails & Reliability Hardening</h2>
+                <span class="badge">AI Guardrails</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>Per-Session Rate Limiting</strong>: Enforces strict ceiling of <strong>10 messages per minute</strong> per session ID via a thread-safe mutex window (HTTP 429).</li>
+                    <li><strong>Deduplication In-Memory Cache</strong>: Repeated questions in a session return instant cached replies (<code>cached = true</code>) in 0ms.</li>
+                    <li><strong>Fixed Server-Side Prompt Template</strong>: Restricts AI scope strictly to marketplace products, shipping, returns, and seller onboarding.</li>
+                    <li><strong>Degraded Fallback Resilience</strong>: Outbound calls feature 5-second timeouts; network dropouts gracefully degrade to canned domain knowledge.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 6 of 10</div>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide-card" data-slide="7">
+            <div class="slide-header">
+                <h2>7 Required Design Patterns (Section 10)</h2>
+                <span class="badge">Design Patterns</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>1. Repository Pattern</strong>: Abstract SQL interfaces (<code>IUserRepository</code>, <code>IProductRepository</code>, etc.).</li>
+                    <li><strong>2. Front Controller Pattern</strong>: Centralized HTTP routing, session extraction, and security headers.</li>
+                    <li><strong>3. Singleton Pattern</strong>: Thread-safe <code>SessionManager::Instance()</code> for session tokens.</li>
+                    <li><strong>4. Factory Pattern</strong>: <code>ChatProviderFactory</code> for polymorphic AI providers.</li>
+                    <li><strong>5. Strategy Pattern</strong>: Swappable AI implementations behind <code>ChatProvider</code>.</li>
+                    <li><strong>6. Builder Pattern</strong>: Fluent DTO constructors ensuring password hashes never leak.</li>
+                    <li><strong>7. Dependency Injection</strong>: Manual constructor injection across all services.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 7 of 10</div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide-card" data-slide="8">
+            <div class="slide-header">
+                <h2>Security & Hardening Checklist</h2>
+                <span class="badge">Security</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>100% Parameterized SQL</strong>: All queries use prepared statements and parameter binding.</li>
+                    <li><strong>Argon2id Hashing</strong>: Passwords securely hashed with Argon2id via libsodium.</li>
+                    <li><strong>Session Fixation Defense</strong>: Pre-authentication sessions destroyed; fresh tokens issued upon login.</li>
+                    <li><strong>Zero Error Leakage</strong>: Universal exception handler standardizes all errors without exposing traces.</li>
+                    <li><strong>Memory Safety</strong>: Zero raw owning pointers; 100% managed via <code>unique_ptr</code> and <code>shared_ptr</code>.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 8 of 10</div>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide-card" data-slide="9">
+            <div class="slide-header">
+                <h2>Automated Testing & CI Pipeline</h2>
+                <span class="badge">Testing</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>Unit Test Suite</strong>:
+                        <ul>
+                            <li><code>test_money.cpp</code>: Validates integer minor unit math and formatted strings.</li>
+                            <li><code>test_validation.cpp</code>: Validates emails, passwords, and rating ranges.</li>
+                            <li><code>test_chat.cpp</code>: Validates FAQ answers, 10 msg/min rate limiting, caching, and fallback.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Repository Test Suite</strong>:
+                        <ul>
+                            <li><code>test_sqlite_repositories.cpp</code>: Tests full CRUD and relational constraints in SQLite <code>:memory:</code>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>CI Pipeline</strong>: GitHub Actions workflow tests with ASan & UBSan sanitizers on every push.</li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 9 of 10</div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide-card" data-slide="10">
+            <div class="slide-header">
+                <h2>Deployment & Live Demonstration</h2>
+                <span class="badge">Demo</span>
+            </div>
+            <div class="slide-body">
+                <ul>
+                    <li><strong>Deployment Options</strong>:
+                        <ul>
+                            <li>Standalone compiled C++ executable (<code>ddmart</code>).</li>
+                            <li>systemd service unit with auto-restart.</li>
+                            <li>Nginx reverse proxy with TLS termination.</li>
+                            <li>Multi-stage Dockerfile (~85MB runtime container).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Live Demo Flow</strong>:
+                        <ol>
+                            <li>Buyer signup, product browsing, and category filtering.</li>
+                            <li>Cart addition and atomic mock checkout.</li>
+                            <li>Seller order fulfillment and GMV analytics.</li>
+                            <li>Customer review and star rating submission.</li>
+                            <li>AI Chatbot FAQ query and rate-limit test.</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+            <div style="font-size:0.9rem; color:#94a3b8;">Slide 10 of 10</div>
+        </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="slide-controls">
+        <button class="ctrl-btn" id="prev-btn" onclick="prevSlide()">◀ Previous</button>
+        <span id="slide-indicator" style="font-weight:700; color:#818cf8;">Slide 1 / 10</span>
+        <button class="ctrl-btn" id="next-btn" onclick="nextSlide()">Next ▶</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function updateSlide() {
+            document.querySelectorAll('.slide-card').forEach(card => {
+                card.classList.toggle('active', parseInt(card.dataset.slide) === currentSlide);
+            });
+            document.getElementById('slide-indicator').textContent = `Slide ${currentSlide} / ${totalSlides}`;
+            document.getElementById('prev-btn').disabled = currentSlide === 1;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>

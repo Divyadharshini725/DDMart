@@ -13,6 +13,8 @@
 #include "service/CartService.h"
 #include "service/OrderService.h"
 #include "service/ReviewService.h"
+#include "service/ChatService.h"
+#include "dto/ChatDto.h"
 #include "filter/SessionManager.h"
 #include "util/JsonUtil.h"
 #include "exception/ApiException.h"
@@ -27,13 +29,15 @@ public:
         std::shared_ptr<service::CartService> cart_service,
         std::shared_ptr<service::OrderService> order_service,
         std::shared_ptr<service::ReviewService> review_service,
-        std::shared_ptr<repository::SqliteDatabase> db)
+        std::shared_ptr<repository::SqliteDatabase> db,
+        std::shared_ptr<service::ChatService> chat_service = nullptr)
         : user_service_(std::move(user_service)),
           product_service_(std::move(product_service)),
           cart_service_(std::move(cart_service)),
           order_service_(std::move(order_service)),
           review_service_(std::move(review_service)),
-          db_(std::move(db)) {}
+          db_(std::move(db)),
+          chat_service_(std::move(chat_service)) {}
 
     void SetupRoutes(const std::string& public_dir) {
         // Serve static assets from public/ directory
@@ -510,8 +514,54 @@ public:
                 SendApiException(res, e);
             } catch (const std::exception& e) {
                 SendGenericError(res, e.what());
-            }
         });
+
+        // -------------------------------------------------------------
+        // AI Chatbot Endpoints (Phase 3 - Section 9 & 15)
+        // -------------------------------------------------------------
+        auto handle_chat = [this](const httplib::Request& req, httplib::Response& res) {
+            try {
+                if (!chat_service_) {
+                    throw exception::ApiException(503, "SERVICE_UNAVAILABLE", "AI Chatbot service is not initialized");
+                }
+
+                std::string session_id = ExtractSessionId(req);
+                if (session_id.empty()) {
+                    if (req.has_header("X-Session-ID")) {
+                        session_id = req.get_header_value("X-Session-ID");
+                    } else if (!req.remote_addr.empty()) {
+                        session_id = "guest_" + req.remote_addr;
+                    } else {
+                        session_id = "guest_default";
+                    }
+                }
+
+                if (req.body.empty()) {
+                    throw exception::ValidationException("Request body cannot be empty");
+                }
+
+                auto body = nlohmann::json::parse(req.body);
+                std::string message = body.value("message", "");
+
+                auto chat_resp = chat_service_->ProcessMessage(session_id, message);
+
+                nlohmann::json data = chat_resp.ToJson();
+                nlohmann::json envelope = {
+                    {"success", true},
+                    {"data", data},
+                    {"reply", chat_resp.reply},
+                    {"error", nullptr}
+                };
+                SendJsonResponse(res, 200, envelope);
+            } catch (const exception::ApiException& e) {
+                SendApiException(res, e);
+            } catch (const std::exception& e) {
+                SendGenericError(res, e.what());
+            }
+        };
+
+        server_.Post("/api/chat", handle_chat);
+        server_.Post("/api/v1/chat", handle_chat);
     }
 
     void Listen(const std::string& host, int port) {
@@ -613,6 +663,7 @@ private:
     std::shared_ptr<service::CartService> cart_service_;
     std::shared_ptr<service::OrderService> order_service_;
     std::shared_ptr<service::ReviewService> review_service_;
+    std::shared_ptr<service::ChatService> chat_service_;
     std::shared_ptr<repository::SqliteDatabase> db_;
 };
 

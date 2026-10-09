@@ -6,7 +6,7 @@
 [![Security](https://img.shields.io/badge/Hashing-Argon2id%20(libsodium)-purple.svg)]()
 
 > **Native C++ Marketplace Backend Specification**  
-> **Milestone**: September 21 Full Build + Deploy Review (F1 through F8, O2, O3 Complete)  
+> **Milestone**: October 10 Final Review & Capstone Defense (F1 through F8, O2, O3, O4 Complete)  
 > **Builder**: Solo Project (`dd::ddmart`)
 
 DDMart is a multi-vendor e-commerce marketplace web application served by a native C++20 HTTP backend. It features strict 3-tier MVC/Service-Repository architecture, role-based access control (Buyer, Seller, Admin), atomic database transactions, persistent storage via SQLite/PostgreSQL, comprehensive input validation, and full security hardening.
@@ -33,6 +33,7 @@ flowchart TD
         SellerController["SellerController"]
         AdminController["AdminController"]
         ReviewController["ReviewController"]
+        ChatController["ChatController (/api/chat)"]
         HealthController["HealthController"]
     end
 
@@ -42,7 +43,14 @@ flowchart TD
         CartService["CartService (Bounds Checking)"]
         OrderService["OrderService (Atomic Checkout & State Machine)"]
         ReviewService["ReviewService (Verified Purchaser Validation)"]
+        ChatService["ChatService (Rate Limiting, Cache & Prompt Guardrails)"]
         MigrationService["MigrationService (Hand-written Runner)"]
+    end
+
+    subgraph AILayer ["AI Strategy Layer (Section 15 Polymorphic Providers)"]
+        ChatProviderFactory["ChatProviderFactory (Factory Pattern)"]
+        MockProvider["MockChatProvider (Domain FAQ Knowledge)"]
+        GeminiProvider["GeminiChatProvider (Google Gemini API via httplib)"]
     end
 
     subgraph RepositoryLayer ["Repository Layer (100% Parameterized SQL)"]
@@ -61,6 +69,9 @@ flowchart TD
     Client --> FilterLayer
     FilterLayer --> ControllerLayer
     ControllerLayer --> ServiceLayer
+    ChatService --> ChatProviderFactory
+    ChatProviderFactory --> MockProvider
+    ChatProviderFactory --> GeminiProvider
     ServiceLayer --> RepositoryLayer
     RepositoryLayer --> SqliteDB
     SqliteDB --> DB
@@ -85,7 +96,7 @@ flowchart TD
 
 ---
 
-## Feature Matrix (F1 – F8 + O2, O3)
+## Feature Matrix (F1 – F8 + O2, O3, O4)
 
 | ID | Feature | Implementation Details | Status |
 |---|---|---|---|
@@ -99,6 +110,7 @@ flowchart TD
 | **F8** | Product Reviews | Verified buyer reviews and 1–5 star ratings on completed orders with average score calculations | ✅ Complete |
 | **O2** | Order Lifecycle Workflow | State machine: `PENDING` &rarr; `CONFIRMED` &rarr; `SHIPPED` &rarr; `DELIVERED` | ✅ Complete |
 | **O3** | Seller Dashboard | Real-time order counts, revenue totals using `Money` value object | ✅ Complete |
+| **O4** | AI Chatbot | C++ Strategy/Factory pattern, session rate limit (10/min), question cache, prompt guardrails, floating widget | ✅ Complete |
 
 ---
 
@@ -168,6 +180,57 @@ Error response envelope:
 | `GET` | `/api/v1/seller/dashboard` | Seller sales dashboard with revenue and order metrics |
 | `GET` | `/api/v1/admin/stats` | Admin platform GMV, user, order, and listing metrics |
 | `GET` | `/api/v1/admin/users` | Admin user directory |
+| `POST` | `/api/chat` | AI Chatbot interaction endpoint (vanilla JS widget) |
+| `POST` | `/api/v1/chat` | Versioned AI Chatbot interaction endpoint |
+
+---
+
+## Phase 3: AI Chatbot Architecture (Section 9 & 15)
+
+The AI Chatbot provides real-time intelligent customer assistance for marketplace questions, policies, and store navigation.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Buyer / Guest
+    participant Widget as Floating Chat Widget (JS)
+    participant Controller as ChatController (/api/chat)
+    participant Service as ChatService
+    participant Cache as In-Memory Cache (std::unordered_map)
+    participant RateLimit as Mutex-Guarded Rate Limiter (10/min)
+    participant Factory as ChatProviderFactory
+    participant Provider as ChatProvider (Strategy)
+
+    User->>Widget: Types question / clicks FAQ chip
+    Widget->>Controller: POST /api/chat { message: "..." }
+    Controller->>Service: ProcessMessage(session_id, message)
+    Service->>RateLimit: Check & enforce 10 requests / min limit
+    alt Rate limit exceeded
+        RateLimit-->>Controller: 429 Too Many Requests
+        Controller-->>Widget: Error envelope { code: "RATE_LIMIT_EXCEEDED" }
+    else Allowed
+        Service->>Cache: Lookup identical question in session cache
+        alt Cache hit
+            Cache-->>Service: Return cached response (0ms)
+        else Cache miss
+            Service->>Factory: Create active provider (gemini / mock)
+            Factory->>Provider: Instantiate Strategy implementation
+            Provider-->>Service: Generated reply (or static degraded fallback)
+            Service->>Cache: Save reply to session cache
+        end
+        Service-->>Controller: ChatResponseDto { reply, cached, provider }
+        Controller-->>Widget: 200 OK { success: true, reply: "...", data: { ... } }
+        Widget->>User: Renders bot bubble + timestamp
+    end
+```
+
+### AI Guardrails & Features
+1. **Strategy Pattern**: Abstract `ChatProvider` interface allows hot-swapping between `MockChatProvider` (offline domain FAQ) and `GeminiChatProvider` (Google Gemini 1.5 Flash).
+2. **Factory Pattern**: `ChatProviderFactory` automatically detects the provider via `AI_CHATBOT_PROVIDER` (`gemini` or `mock`).
+3. **Per-Session Rate Limiting**: Mutex-guarded in-memory window limiting each session to a maximum of 10 messages per minute.
+4. **Deduplication Caching**: Instantaneous response for repeated identical questions within the same session.
+5. **Fixed Server-Side Prompt Template**: Strict guardrails preventing prompt injection and keeping the model focused on DDMart products and marketplace assistance.
+6. **Graceful Degraded Fallback**: If network fails or Gemini times out, the service falls back to static domain guidance instead of crashing or returning a 500 error.
 
 ---
 

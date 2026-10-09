@@ -1,6 +1,6 @@
 {
   "name": "ddmart",
-  "version-string": "1.0.0",
+  "version-string": "1.2.0",
   "description": "DDMart - Native C++20 Marketplace Backend Application",
   "dependencies": [
     "nlohmann-json",

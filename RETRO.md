@@ -24,3 +24,13 @@
 - **What Worked**: Sanitizers ran clean with zero leaks due to strict RAII and `std::unique_ptr` usage; multi-stage Docker build resulted in a compact 85MB runtime container.
 - **What Didn't**: Windows and Linux path separator differences in migration file discovery.
 - **One Change for Next Sprint**: Use `std::filesystem::path` uniformly across all I/O runners.
+
+## Sprint 6 (Sep 21 – Oct 4): AI Chatbot Integration & UI Polish
+- **What Worked**: Strategy and Factory patterns cleanly decoupled LLM providers from HTTP routing; in-memory caching reduced duplicate query overhead to 0ms.
+- **What Didn't**: Outbound SSL requests over high-latency networks required tuning client read timeouts.
+- **One Change for Next Sprint**: Provide instantaneous degraded fallback to canned FAQ domain knowledge on timeout or offline mode.
+
+## Sprint 7 (Oct 5 – Oct 10): Final Regression Pass, Documentation & Capstone Review
+- **What Worked**: Unit and repository regression tests validated all edge cases with zero ASan/UBSan findings; presentation slide deck and rehearsed demo guide provide complete evaluation readiness.
+- **What Didn't**: Consolidating architecture report across 7 required design patterns took extensive coordination.
+- **One Change for Next Sprint**: Maintain living architecture documentation alongside PR merges.

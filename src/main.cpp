@@ -17,6 +17,8 @@
 #include "service/OrderService.h"
 #include "service/ReviewService.h"
 #include "service/MigrationService.h"
+#include "service/ChatService.h"
+#include "service/ChatProviderFactory.h"
 
 #include "util/PasswordUtil.h"
 #include "controller/HttpServer.h"
@@ -76,6 +78,12 @@ int main(int argc, char* argv[]) {
     auto order_service = std::make_shared<dd::ddmart::service::OrderService>(order_repo, cart_repo, product_repo);
     auto review_service = std::make_shared<dd::ddmart::service::ReviewService>(review_repo, order_repo, product_repo);
 
+    // AI Chatbot Service (Phase 3: Strategy & Factory Patterns)
+    auto chat_provider = std::shared_ptr<dd::ddmart::service::ChatProvider>(
+        dd::ddmart::service::ChatProviderFactory::Create()
+    );
+    auto chat_service = std::make_shared<dd::ddmart::service::ChatService>(chat_provider, product_repo);
+
     // 7. Resolve Public Web Assets Directory
     std::string public_dir = "public";
     if (!std::filesystem::exists(public_dir) && std::filesystem::exists("../public")) {
@@ -84,7 +92,7 @@ int main(int argc, char* argv[]) {
 
     // 8. Start HTTP Server
     dd::ddmart::controller::HttpServer server(
-        user_service, product_service, cart_service, order_service, review_service, db
+        user_service, product_service, cart_service, order_service, review_service, db, chat_service
     );
     server.SetupRoutes(public_dir);
 
