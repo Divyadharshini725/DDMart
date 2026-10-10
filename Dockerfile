@@ -5,31 +5,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     ninja-build \
-    pkg-config \
-    libsqlite3-dev \
-    libsodium-dev \
-    libspdlog-dev \
-    nlohmann-json3-dev \
-    libgtest-dev \
-    git \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY . .
 
-RUN cmake -B build -G Ninja \
+# Ensure clean build directory to prevent host-container cache conflicts
+RUN rm -rf build && cmake -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF \
     && cmake --build build --config Release
 
 # Stage 2: Minimal Runtime Container
 FROM debian:bookworm-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libsqlite3-0 \
-    libsodium23 \
-    libspdlog1.10 \
     ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/ddmart

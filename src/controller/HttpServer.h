@@ -514,6 +514,7 @@ public:
                 SendApiException(res, e);
             } catch (const std::exception& e) {
                 SendGenericError(res, e.what());
+            }
         });
 
         // -------------------------------------------------------------
@@ -663,8 +664,8 @@ private:
     std::shared_ptr<service::CartService> cart_service_;
     std::shared_ptr<service::OrderService> order_service_;
     std::shared_ptr<service::ReviewService> review_service_;
-    std::shared_ptr<service::ChatService> chat_service_;
     std::shared_ptr<repository::SqliteDatabase> db_;
+    std::shared_ptr<service::ChatService> chat_service_;
 };
 
 } // namespace dd::ddmart::controller
