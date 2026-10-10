@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include "repository/SqliteDatabase.h"
+#include "repository/MysqlDatabase.h"
 #include "repository/SqliteUserRepository.h"
 #include "repository/SqliteProductRepository.h"
 #include "repository/SqliteCartRepository.h"
@@ -40,6 +41,23 @@ int main(int argc, char* argv[]) {
     const char* env_db = std::getenv("DB_PATH");
     if (env_db != nullptr) {
         db_path = env_db;
+    }
+
+    std::string db_type = "sqlite";
+    if (const char* env_type = std::getenv("DB_TYPE")) {
+        db_type = env_type;
+    }
+
+    if (db_type == "mysql") {
+        std::cout << ">>> Initializing MySQL Database subsystem (DB_TYPE=mysql)..." << std::endl;
+        try {
+            auto mysql_db = std::make_shared<dd::ddmart::repository::MysqlDatabase>();
+            if (mysql_db->IsConnected()) {
+                std::cout << ">>> MySQL subsystem online." << std::endl;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << ">>> MySQL Connection Notice: " << e.what() << " | Running core catalog on SQLite engine." << std::endl;
+        }
     }
 
     // 3. Connect to Database (RAII Connection)

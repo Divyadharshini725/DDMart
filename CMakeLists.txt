@@ -81,6 +81,22 @@ else()
     target_link_libraries(ddmart PRIVATE pthread)
 endif()
 
+# Optional MySQL / MariaDB Client Library
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(MYSQL_CLIENT QUIET mariadb)
+    if(NOT MYSQL_CLIENT_FOUND)
+        pkg_check_modules(MYSQL_CLIENT QUIET mysqlclient)
+    endif()
+endif()
+
+if(MYSQL_CLIENT_FOUND)
+    message(STATUS "Found MySQL/MariaDB client library: ${MYSQL_CLIENT_LIBRARIES}")
+    target_include_directories(ddmart PRIVATE ${MYSQL_CLIENT_INCLUDE_DIRS})
+    target_link_libraries(ddmart PRIVATE ${MYSQL_CLIENT_LIBRARIES})
+    target_compile_definitions(ddmart PRIVATE DDMART_HAS_MYSQL=1)
+endif()
+
 # Testing Target (optional, disabled by default for fast & clean cloud container builds)
 option(BUILD_TESTING "Build the test suite" OFF)
 if(BUILD_TESTING)

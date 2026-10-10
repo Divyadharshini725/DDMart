@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     ninja-build \
+    pkg-config \
+    libmariadb-dev \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -21,6 +23,7 @@ RUN rm -rf build && cmake -B build -G Ninja \
 FROM debian:bookworm-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libmariadb3 \
     ca-certificates \
     curl \
     && rm -rf /var/lib/apt/lists/*
